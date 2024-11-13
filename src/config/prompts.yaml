@@ -1,0 +1,56 @@
+version: "1.0.0"
+prompts:
+  chunk_analysis:
+    version: "1.0.0"
+    description: "Analyzes individual chunks of search history"
+    template: |
+      Analyze this segment of user search history from a fashion e-commerce platform.
+      
+      Focus on extracting:
+      1. Style preferences (e.g., casual, formal, streetwear)
+      2. Brand interactions
+      3. Price range of viewed items
+      4. Specific product categories of interest
+      5. Any size information
+      6. Seasonal preferences
+      
+      Data: {data}
+      
+      Provide a structured analysis highlighting patterns and preferences.
+
+  final_summary:
+    version: "1.0.0"
+    description: "Generates comprehensive user profile"
+    template: |
+      Based on the complete analysis of the user's search history, create a detailed fashion profile.
+      Previous analyses: {previous_analyses}
+      
+      Generate a comprehensive profile with these sections:
+      
+      1. Core Style Identity:
+         - Primary style categories
+         - Style sophistication level
+         - Key aesthetic preferences
+      
+      2. Shopping Behaviour:
+         - Preferred price ranges
+         - Brand loyalty indicators
+         - Seasonal shopping patterns
+         - Most frequently searched categories
+      
+      3. Technical Details:
+         - Size information
+         - Fit preferences
+         - Specific feature preferences
+      
+      4. Product Recommendations:
+         - Top 5 specific product types
+         - 3 brand recommendations
+         - 2 new style suggestions based on current preferences
+         
+      5. Marketing Insights:
+         - Price sensitivity
+         - Best time to engage
+         - Preferred product categories
+      
+      Format each section clearly and provide specific examples where possible.
