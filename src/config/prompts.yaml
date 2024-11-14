@@ -1,56 +1,136 @@
-version: "1.0.0"
+version: "2.1.0"
 prompts:
   chunk_analysis:
-    version: "1.0.0"
-    description: "Analyzes individual chunks of search history"
+    version: "2.1.0"
+    description: "Analyzes general browsing history to infer user preferences and demographic information"
     template: |
-      Analyze this segment of user search history from a fashion e-commerce platform.
+      Analyze this segment of user browsing history, focusing on general user behaviour and preferences.
+      Note: Specific fashion-related entities and topics will be analyzed separately.
       
-      Focus on extracting:
-      1. Style preferences (e.g., casual, formal, streetwear)
-      2. Brand interactions
-      3. Price range of viewed items
-      4. Specific product categories of interest
-      5. Any size information
-      6. Seasonal preferences
+      Focus on extracting insights about:
+      1. **Demographics**:
+         - Gender indicators
+         - Age range indicators
+         - Life stage clues (student, professional, parent, etc.)
+      
+      2. **Lifestyle Indicators**:
+         - Income level hints
+         - Activity patterns
+         - Social interests
+      
+      3. **Geographic and Cultural Context**:
+         - Location indicators
+         - Cultural preferences
+         - Language preferences
+      
+      4. **Digital Behaviour**:
+         - Time patterns
+         - Device usage
+         - Content preferences
       
       Data: {data}
       
-      Provide a structured analysis highlighting patterns and preferences.
+      Provide a concise analysis focusing on these general behavioural patterns.
 
   final_summary:
-    version: "1.0.0"
-    description: "Generates comprehensive user profile"
+    version: "2.1.0"
+    description: "Generates comprehensive user profile combining general analysis with fashion-specific insights"
     template: |
-      Based on the complete analysis of the user's search history, create a detailed fashion profile.
-      Previous analyses: {previous_analyses}
+      Create a detailed user profile combining the general browsing analysis with fashion-specific insights.
+      
+      General browsing analysis: {previous_analyses}
+      Fashion entity data: {fashion_entities}
+      Topic analysis: {topic_frequencies}
       
       Generate a comprehensive profile with these sections:
       
-      1. Core Style Identity:
-         - Primary style categories
-         - Style sophistication level
-         - Key aesthetic preferences
+      1. **Core User Profile**:
+         - Demographics (gender, age range, life stage)
+         - Geographic context
+         - Lifestyle indicators
       
-      2. Shopping Behaviour:
-         - Preferred price ranges
+      2. **Fashion Profile**:
+         - Most frequently searched brands (by category)
+         - Dominant product interests
+         - Preferred styles and aesthetics
+      
+      3. **Shopping Behaviour**:
+         - Price sensitivity (based on brand preferences)
+         - Shopping patterns
          - Brand loyalty indicators
-         - Seasonal shopping patterns
-         - Most frequently searched categories
       
-      3. Technical Details:
-         - Size information
-         - Fit preferences
-         - Specific feature preferences
+      4. **Recommendations**:
+         - Product recommendations based on frequency analysis
+         - Style suggestions based on identified preferences
+         - Brand recommendations aligned with price range and style
       
-      4. Product Recommendations:
-         - Top 5 specific product types
-         - 3 brand recommendations
-         - 2 new style suggestions based on current preferences
-         
-      5. Marketing Insights:
-         - Price sensitivity
-         - Best time to engage
-         - Preferred product categories
+      5. **Marketing Approach**:
+         - Suggested engagement channels
+         - Content type preferences
+         - Timing recommendations
       
-      Format each section clearly and provide specific examples where possible.
+      Use specific examples from the data where possible, particularly focusing on frequently occurring entities and topics.
+
+  fashion_entity_extraction:
+    version: "1.0.0"
+    description: "Extracts fashion-specific entities from browsing history"
+    template: |
+      Analyze this browsing history segment and extract fashion-related entities.
+      If an entity matches one already in the provided lists, use the exact same string format.
+      
+      Current entities:
+      {current_entities}
+      
+      Browsing data: {data}
+      
+      Extract and categorize entities into these exact categories:
+      1. brands:
+         - luxury: High-end fashion brands
+         - high_street: Mid-range retail brands
+         - sportswear: Athletic and activewear brands
+      
+      2. product_types:
+         - clothing: Garment types (e.g., dresses, jeans)
+         - accessories: Bags, jewellery, etc.
+         - footwear: All types of shoes
+      
+      3. styles:
+         - aesthetic: Style descriptions (e.g., bohemian, minimalist)
+         - occasion: Event-specific styles (e.g., workwear, party)
+         - seasonal: Season-specific styles (e.g., summer, winter)
+
+      Return only the structured data in valid JSON format.
+
+  topic_extraction:
+    version: "1.0.0"
+    description: "Identifies fashion-related topics and themes"
+    template: |
+      Analyze this browsing history segment for fashion-related topics and themes.
+      If a topic matches one already identified, use the exact same wording.
+      
+      Current topics:
+      {current_topics}
+      
+      Browsing data: {data}
+      
+      Identify key topics related to:
+      1. Fashion interests (e.g., "sustainable fashion", "vintage clothing")
+      2. Shopping behaviours (e.g., "discount hunting", "luxury shopping")
+      3. Style preferences (e.g., "minimalist aesthetic", "bold colours")
+
+      Return only the structured data in valid JSON format.
+
+  additional_analysis:
+    version: "1.1.0"
+    description: "Optional analysis for additional insights"
+    template: |
+      Review this analysis segment for any additional insights not captured by the main analysis.
+      
+      Analysis: {analysis}
+      
+      Look for:
+      1. Emerging trends in user behaviour
+      2. Seasonal patterns
+      3. Cross-category relationships
+      
+      Return insights in a structured format.
