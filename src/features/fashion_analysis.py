@@ -3,9 +3,10 @@ import json
 from dataclasses import dataclass, field
 import openai
 from datetime import datetime
+import time
+import random
 
 # Configuration constants
-MODEL = "gpt-4o-mini"
 ENTITY_EXTRACTION_TEMPERATURE = 0.3
 SUMMARY_TEMPERATURE = 0.7
 
@@ -32,6 +33,7 @@ class FashionAnalyzer:
     fashion_topics: List[str] = field(default_factory=list)
     prompt_manager: Any = None
     chroma_client: Any = None
+    model: str = "gpt-4o-mini"
 
     def analyze_chunk(self, chunk: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
@@ -43,13 +45,22 @@ class FashionAnalyzer:
         Returns:
             Dictionary containing summary, entities, and topics
         """
+        # Add small random delay to avoid rate limits
+        time.sleep(random.uniform(1, 2))
+        
         # Extract fashion entities
         entities = self._extract_fashion_entities(chunk)
         self._update_fashion_entities(entities)
         
+        # Add small delay between API calls
+        time.sleep(random.uniform(1, 2))
+        
         # Extract topics
         topics = self._extract_topics(chunk)
         self._update_topics(topics)
+        
+        # Add small delay between API calls
+        time.sleep(random.uniform(1, 2))
         
         # Generate summary focusing on fashion aspects
         summary = self._generate_chunk_summary(chunk, entities, topics)
@@ -72,7 +83,7 @@ class FashionAnalyzer:
             )
             
             response = openai.chat.completions.create(
-                model=MODEL,
+                model=self.model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=ENTITY_EXTRACTION_TEMPERATURE,
                 response_format={ "type": "json_object" }
@@ -100,7 +111,7 @@ class FashionAnalyzer:
             )
             
             response = openai.chat.completions.create(
-                model=MODEL,
+                model=self.model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=ENTITY_EXTRACTION_TEMPERATURE,
                 response_format={ "type": "json_object" }
@@ -126,12 +137,12 @@ class FashionAnalyzer:
                 "topics": topics
             }
             
-            prompt = self.prompt_manager.get_chunk_analysis_prompt(
+            prompt = self.prompt_manager.get_chunk_prompt(
                 json.dumps(context)
             )
             
             response = openai.chat.completions.create(
-                model=MODEL,
+                model=self.model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=SUMMARY_TEMPERATURE
             )

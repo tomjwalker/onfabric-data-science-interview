@@ -71,6 +71,39 @@ class PromptManager:
             topic_frequencies=json.dumps(self.topic_frequencies) if hasattr(self, 'topic_frequencies') else "No topic frequencies found"
         )
 
+class ModelConfig:
+    """Central configuration for OpenAI model settings"""
+    
+    DEFAULT_MODEL = "gpt-4o-mini"
+    
+    # Model context windows
+    MAX_TOKENS = {
+        "gpt-4": 8192,
+        "gpt-4-32k": 32768,
+        "gpt-3.5-turbo": 4096,
+        "gpt-4-turbo": 128000,
+        "gpt-4o-mini": 8000
+    }
+    
+    # Cost per 1k tokens (input, output) in USD
+    COSTS_PER_1K_TOKENS = {
+        "gpt-4": (0.03, 0.06),
+        "gpt-4-32k": (0.06, 0.12),
+        "gpt-4-turbo": (0.01, 0.03),
+        "gpt-3.5-turbo": (0.0005, 0.0015),
+        "gpt-4o-mini": (0.000150, 0.000600)
+    }
+    
+    @classmethod
+    def get_context_length(cls, model: str) -> int:
+        """Get the maximum context length for a model"""
+        return cls.MAX_TOKENS.get(model, cls.MAX_TOKENS[cls.DEFAULT_MODEL])
+    
+    @classmethod
+    def get_cost_rates(cls, model: str) -> tuple[float, float]:
+        """Get the cost rates (input, output) for a model"""
+        return cls.COSTS_PER_1K_TOKENS.get(model, cls.COSTS_PER_1K_TOKENS[cls.DEFAULT_MODEL])
+
 def read_json_in_chunks(file_path: str, chunk_size: int) -> Iterator[List[dict]]:
     """
     Reads a JSON file incrementally and yields chunks of data.
@@ -118,83 +151,81 @@ def process_chunk(chunk: List[dict], prompt_manager: PromptManager, chroma_clien
     chunk_json = json.dumps(chunk)
     chunk_hash = hashlib.md5(chunk_json.encode()).hexdigest()
     
-    # Check if similar analysis exists
-    collection = chroma_client.get_or_create_collection("chunk_analyses")
-    similar_results = collection.query(
-        query_texts=[chunk_json],
-        n_results=1,
-        where={"similarity": {"$gt": 0.95}}
-    )
+    # Add exponential backoff for rate limiting
+    max_retries = 5
+    base_delay = 1  # Start with 1 second delay
     
-    if similar_results and similar_results['documents']:
-        # Even if we found a cached analysis, still update fashion entities and topics
-        # as we want to track frequencies
-        fashion_analyzer.analyze_chunk(chunk)
-        return similar_results['documents'][0]
-    
-    # If no similar analysis, process with OpenAI and fashion analyzer
-    analysis_results = fashion_analyzer.analyze_chunk(chunk)
-    
-    # Store new analysis with enhanced metadata
-    collection.add(
-        documents=[analysis_results['summary']],
-        metadatas=[{
-            "chunk_hash": chunk_hash,
-            "timestamp": time.time(),
-            "entities": json.dumps(analysis_results['entities']),
-            "topics": json.dumps(analysis_results['topics'])
-        }],
-        ids=[chunk_hash]
-    )
-    
-    return analysis_results['summary']
+    for attempt in range(max_retries):
+        try:
+            # Check if similar analysis exists
+            collection = chroma_client.get_or_create_collection("chunk_analyses")
+            similar_results = collection.query(
+                query_texts=[chunk_json],
+                n_results=1,
+                where={"similarity": {"$gt": 0.95}}
+            )
+            
+            if similar_results and similar_results['documents']:
+                # Even if we found a cached analysis, still update fashion entities and topics
+                fashion_analyzer.analyze_chunk(chunk)
+                return similar_results['documents'][0]
+            
+            # If no similar analysis, process with OpenAI and fashion analyzer
+            analysis_results = fashion_analyzer.analyze_chunk(chunk)
+            
+            # Store new analysis with enhanced metadata
+            collection.add(
+                documents=[analysis_results['summary']],
+                metadatas=[{
+                    "chunk_hash": chunk_hash,
+                    "timestamp": time.time(),
+                    "entities": json.dumps(analysis_results['entities']),
+                    "topics": json.dumps(analysis_results['topics'])
+                }],
+                ids=[chunk_hash]
+            )
+            
+            return analysis_results['summary']
+            
+        except openai.RateLimitError:
+            if attempt == max_retries - 1:  # Last attempt
+                raise
+            delay = (2 ** attempt) * base_delay  # Exponential backoff
+            print(f"Rate limit exceeded. Waiting {delay} seconds before retry {attempt + 1}/{max_retries}")
+            time.sleep(delay)
+        except Exception as e:
+            print(f"Error in summary generation: {str(e)}")
+            return ""
 
-def process_with_openai(chunk: List[dict], prompt_manager: PromptManager) -> str:
-    """
-    Sends a chunk of data to the OpenAI API for analysis and returns the result.
-
-    Args:
-        chunk (List[dict]): A list of JSON objects to analyze.
-        prompt_manager (PromptManager): Manager for handling prompt templates.
-
-    Returns:
-        str: The analysis result from the OpenAI model.
-    """
+def process_with_openai(chunk: List[dict], prompt_manager: PromptManager, model: str = ModelConfig.DEFAULT_MODEL) -> str:
+    """Sends a chunk of data to the OpenAI API for analysis"""
     chunk_json = json.dumps(chunk)
     prompt = prompt_manager.get_chunk_prompt(chunk_json)
 
-    # Estimate the number of tokens in the prompt
-    encoding = tiktoken.encoding_for_model('gpt-4')
+    encoding = tiktoken.encoding_for_model(model)
     prompt_tokens = len(encoding.encode(prompt))
+    max_response_tokens = 500
+    max_context_length = ModelConfig.get_context_length(model)
 
-    # Set the maximum number of tokens for the response
-    max_response_tokens = 500  # Adjust based on expected response length
-
-    # Total tokens should not exceed the model's context length
-    max_context_length = 8000  # For GPT-4o-mini
     if prompt_tokens + max_response_tokens > max_context_length:
-        # Calculate how many tokens need to be removed
         tokens_to_remove = prompt_tokens + max_response_tokens - max_context_length
-        # Estimate how many items to remove from the chunk
         avg_tokens_per_item = prompt_tokens / len(chunk)
         items_to_remove = int(tokens_to_remove / avg_tokens_per_item) + 1
-        # Reduce the chunk size accordingly
         print(f"Reducing chunk size by {items_to_remove} items to fit within context length.")
-        return process_with_openai(chunk[:-items_to_remove], prompt_manager)
+        return process_with_openai(chunk[:-items_to_remove], prompt_manager, model)
 
     try:
-        client = openai.OpenAI()  # Create client instance
+        client = openai.OpenAI()
         response = client.chat.completions.create(
-            model='gpt-4o-mini',
+            model=model,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=max_response_tokens
         )
-        analysis: str = response.choices[0].message.content
-        return analysis
-    except openai.RateLimitError:  # Updated exception class
+        return response.choices[0].message.content
+    except openai.RateLimitError:
         print("Rate limit exceeded. Waiting for 60 seconds before retrying...")
         time.sleep(60)
-        return process_with_openai(chunk, prompt_manager)
+        return process_with_openai(chunk, prompt_manager, model)
     except Exception as e:
         print(f"An error occurred: {e}")
         return ""
@@ -241,13 +272,31 @@ def generate_final_summary(chunk_summaries: List[str], fashion_analysis: Dict, p
         print(f"Error generating final summary: {e}")
         return "Error generating final summary. Please check the individual chunk analyses and fashion analysis data."
 
-def main(verbose: bool = False, test_mode: bool = False, output_file: str = './data/processed/analysis_summary.txt') -> None:
+def estimate_tokens_and_cost(chunk: List[dict], model: str = ModelConfig.DEFAULT_MODEL) -> tuple[int, float]:
+    """Estimate tokens and cost for processing a chunk."""
+    encoding = tiktoken.encoding_for_model(model)
+    chunk_str = json.dumps(chunk)
+    token_count = len(encoding.encode(chunk_str))
+    
+    input_cost, output_cost = ModelConfig.get_cost_rates(model)
+    estimated_output_tokens = 500  # Approximate response length
+    
+    total_cost = (token_count * input_cost / 1000) + (estimated_output_tokens * output_cost / 1000)
+    return token_count + estimated_output_tokens, total_cost
+
+def main(verbose: bool = False, test_mode: bool = False, output_file: str = './data/processed/analysis_summary.txt', input_file: str = None, model: str = ModelConfig.DEFAULT_MODEL) -> None:
     """
     Main function to read the JSON file, process each chunk, and generate a final summary.
+    
+    Args:
+        verbose (bool): Enable verbose logging
+        test_mode (bool): Run in test mode (process only 2 chunks)
+        output_file (str): Path to output file
+        input_file (str): Path to input JSON file (optional)
     """
     # Ensure all paths are Path objects and absolute
     base_dir = Path(__file__).parent.parent.parent  # Gets the project root directory
-    file_path = base_dir / 'data/raw/search_history.json'
+    file_path = Path(input_file) if input_file else base_dir / 'data/raw/search_history.json'
     output_path = base_dir / 'data/processed'
     
     # Create output directory if it doesn't exist
@@ -263,18 +312,43 @@ def main(verbose: bool = False, test_mode: bool = False, output_file: str = './d
     chroma_client = chromadb.Client()
     fashion_analyzer = FashionAnalyzer(
         prompt_manager=prompt_manager,
-        chroma_client=chroma_client
+        chroma_client=chroma_client,
+        model=model
     )
+
+    if verbose:
+        print("Counting total items...")
+        total_items = count_total_items(str(file_path))
+        estimated_chunks = total_items // 100  # Assuming chunk_size of 100
+        print(f"Found {total_items} items ({estimated_chunks} chunks)")
+        
+        # Estimate total cost
+        with open(str(file_path), 'r', encoding='utf-8') as f:
+            sample_chunk = []
+            for i, line in enumerate(ijson.items(f, 'item')):
+                sample_chunk.append(line)
+                if i >= 99:  # Get a sample chunk of 100 items
+                    break
+        
+        tokens, cost_per_chunk = estimate_tokens_and_cost(sample_chunk, model=model)
+        total_estimated_cost = cost_per_chunk * estimated_chunks * 3  # *3 for entity, topic, and summary analysis
+        print(f"Estimated total cost: ${total_estimated_cost:.2f}")
+        print(f"Estimated tokens per chunk: {tokens}")
+        
+        proceed = input("Do you want to proceed? (y/n): ")
+        if proceed.lower() != 'y':
+            print("Aborting...")
+            return
 
     chunk_summaries: List[str] = []
     chunks_processed = 0
+    
+    # Create progress bar if verbose
+    progress_bar = tqdm(total=estimated_chunks) if verbose else None
 
-    if verbose:
-        print("Starting chunk processing...")
-        
     for chunk in read_json_in_chunks(str(file_path), chunk_size=100):
         if verbose:
-            print(f"\nProcessing chunk {chunks_processed + 1}")
+            print(f"\nProcessing chunk {chunks_processed + 1}/{estimated_chunks}")
             
         # Process chunk with both general and fashion analysis
         analysis_results = process_chunk(chunk, prompt_manager, chroma_client, fashion_analyzer)
@@ -283,10 +357,16 @@ def main(verbose: bool = False, test_mode: bool = False, output_file: str = './d
             chunk_summaries.append(analysis_results)
             
         chunks_processed += 1
+        if progress_bar:
+            progress_bar.update(1)
+            
         if test_mode and chunks_processed >= 2:
             if verbose:
                 print("\nTest mode: Stopping after 2 chunks")
             break
+
+    if progress_bar:
+        progress_bar.close()
 
     if verbose:
         print("\nGenerating final analysis...")
@@ -326,6 +406,24 @@ def main(verbose: bool = False, test_mode: bool = False, output_file: str = './d
             print(f"\n{category.upper()}:")
             for subcategory, entities in subcategories.items():
                 print(f"  {subcategory}: {list(set(entities))[:3]}")
+
+if __name__ == '__main__':
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Analyze JSON data using GPT-4o-mini')
+    parser.add_argument('--input', '-i', help='Path to input JSON file')
+    parser.add_argument('--output', '-o', default='./data/processed/analysis_summary.txt', help='Path to output file')
+    parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose output')
+    parser.add_argument('--test', '-t', action='store_true', help='Run in test mode (process only 2 chunks)')
+    
+    args = parser.parse_args()
+    
+    main(
+        verbose=args.verbose,
+        test_mode=args.test,
+        output_file=args.output,
+        input_file=args.input
+    )
 
 # if __name__ == '__main__':
 #     """Test the complete pipeline with a small subset of data"""
