@@ -1,25 +1,55 @@
 """
-Module for Analyzing Large JSON Files Using OpenAI's GPT-4o-mini Model.
+User Behaviour and Fashion Analysis Module
 
-This module provides functionality to read a large JSON file incrementally and
-analyze its contents using the OpenAI API. It processes the data in manageable
-chunks due to the context length limitations of the model, combines the analyses,
-and generates a comprehensive summary.
+A comprehensive analysis tool that processes large JSON datasets (e.g., user browsing history)
+to extract fashion insights and user behaviour patterns using OpenAI's GPT models.
 
-Functions:
-- read_json_in_chunks: Reads a large JSON file in chunks.
-- process_chunk: Analyzes a chunk of data using the OpenAI API.
-- count_total_items: Counts the total number of items in the JSON file.
-- main: Orchestrates the reading, processing, and summarizing of the data.
+Key Features:
+- Chunked processing of large JSON files with memory efficiency
+- Fashion entity extraction (brands, products, styles)
+- Topic analysis and trend identification
+- Vector database caching using ChromaDB
+- Rate limiting and cost estimation
+- Comprehensive summary generation
+
+Processing Steps:
+1. Reads JSON data in manageable chunks
+2. For each chunk:
+   - Performs general content analysis
+   - Extracts fashion-specific entities and topics
+   - Caches results in vector database
+3. Combines analyses to generate:
+   - Fashion entity frequencies
+   - Topic distribution
+   - Comprehensive summary
+4. Saves results to structured output files
+
+Command Line Usage:
+    # Full analysis
+    $ python user_comp_analysis.py --input data/raw/search_history.json --verbose
+
+    # Test run (2 chunks only)
+    $ python user_comp_analysis.py --test --verbose
+
+    # Custom output location
+    $ python user_comp_analysis.py -i input.json -o output/analysis.txt
+
+Arguments:
+    --input, -i    : Input JSON file path
+    --output, -o   : Output file path (default: ./data/processed/analysis_summary.txt)
+    --verbose, -v  : Enable detailed progress logging
+    --test, -t     : Run in test mode (process only 2 chunks)
+
+Output Files:
+    - analysis_summary.txt: Overall analysis and insights
+    - fashion_analysis.json: Structured fashion entity and topic data
 
 Dependencies:
-- openai
-- ijson
-- json
-- time
-- typing
-- tiktoken
-- tqdm
+    - openai: LLM integration
+    - ijson: Memory-efficient JSON processing
+    - chromadb: Vector database for caching
+    - tiktoken: Token counting for cost estimation
+    - tqdm: Progress tracking
 """
 
 import openai

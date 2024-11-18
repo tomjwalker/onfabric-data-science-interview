@@ -1,4 +1,38 @@
-"""Example script demonstrating how to use the catalog processing modules
+"""Fashion catalog processing and search demonstration script.
+
+This script showcases the usage of the catalog processing pipeline, which:
+1. Processes fashion product data using OpenAI embeddings
+2. Extracts structured entities (brand, category, price tier)
+3. Stores processed items in a vector database (ChromaDB)
+4. Enables semantic search with filtering
+
+Usage:
+    python process_catalog.py [--catalog-path PATH] [--verbose] [--test]
+
+Arguments:
+    --catalog-path    Path to JSON catalog file (default: data/processed/fashion_catalog_sampled.json)
+    --verbose, -v     Enable detailed processing output
+    --test, -t        Run in test mode
+
+Input JSON format:
+    [
+        {
+            "title": str,
+            "description": str,
+            "brand": str,
+            "product_url": str,
+            "gender": str,
+            ...
+        },
+        ...
+    ]
+
+Environment Variables:
+    OPENAI_API_KEY    Required for OpenAI API access
+    CATALOG_PATH      Optional default catalog path
+
+Example:
+    python process_catalog.py --catalog-path data/my_catalog.json --verbose 
 """
 import json
 from pathlib import Path

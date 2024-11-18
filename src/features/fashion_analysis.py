@@ -1,3 +1,45 @@
+"""
+Fashion Analysis Module
+======================
+
+This module provides functionality for analyzing fashion-related data, including search history
+and product catalogs, to extract insights about fashion trends, brands, and user preferences.
+
+Features
+--------
+- Entity extraction for fashion brands, product types, and styles
+- Topic analysis and trend identification
+- Integration with OpenAI models for natural language processing
+- Chromadb vector database integration for efficient similarity search
+- Rate limiting and error handling for API calls
+
+Example Usage
+------------
+From the command line:
+    $ python fashion_analysis.py --input data/processed/search_history_sampled.json \
+                               --output data/processed/fashion_analysis.json \
+                               --model gpt-4-mini
+
+From Python:
+    >>> from features.fashion_analysis import FashionAnalyzer
+    >>> analyzer = FashionAnalyzer()
+    >>> results = analyzer.analyze_chunk(search_data)
+    >>> print(results['summary'])
+
+Configuration
+------------
+The module uses the following default parameters:
+- Entity extraction temperature: 0.3 (for focused, consistent results)
+- Summary generation temperature: 0.7 (for creative insights)
+- Default model: gpt-4-mini
+- Rate limiting: 1-2 second delays between API calls
+
+Dependencies
+-----------
+- openai: For natural language processing
+- dataclasses: For structured data handling
+"""
+
 from typing import Dict, List, Any, Optional
 import json
 from dataclasses import dataclass, field

@@ -1,0 +1,230 @@
+{
+  "recommendation_set_1": {
+    "ids": [
+      [
+        "-703151224109269589",
+        "6194893335525328782",
+        "5925811323539825561",
+        "-8755112445720371348",
+        "4960953646971691787"
+      ]
+    ],
+    "embeddings": null,
+    "documents": [
+      [
+        "Dress\n        Dress jean paul gaultier woman color black.\n        Brand: Jean Paul Gaultier\n        Category: dress\n        Style: \n        Materials: \n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "Wool And Silk Scarf\n        Jacquard knit\nFringed edge\n        Brand: Prada\n        Category: scarves\n        Style: \n        Materials: wool, silk\n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "4g Motif Printed Scarf\n        100% Silk. Made in Italy.\n        Brand: Givenchy\n        Category: scarves\n        Style: \n        Materials: 100% Silk\n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "Floral-Print Striped Scarf\n        Light brown linen-cotton blend all-over floral print polka dot print striped border square shape finished edge This item contains at least 50% materials which are certified or widely recognised as having a lower environmental impact through production and/or manufacturing processes that reduce water consumption and the use of harmful chemicals, or re-use by-products of the production process. Learn more about what makes a product Conscious on our Conscious Criteria page Size: One Size. Gender: Male. Material:Cotton/Linen/Flax.\n        Brand: Dolce & Gabbana\n        Category: scarves\n        Style: \n        Materials: linen, cotton, flax\n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "Scarves\n        Elevate your style with this Fendi scarf for men, made of grey wool jacquard featuring the iconic FF pattern and frayed ends.\n        Brand: Fendi\n        Category: scarves\n        Style: \n        Materials: wool, jacquard\n        Colors: \n        Season: None\n        Price Tier: luxury"
+      ]
+    ],
+    "uris": null,
+    "data": null,
+    "metadatas": [
+      [
+        {
+          "brand": "Jean Paul Gaultier",
+          "category": "dress",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/clothing/jean-paul-gaultier-dress-96"
+        },
+        {
+          "brand": "Prada",
+          "category": "scarves",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/accessories/prada-wool-and-silk-scarf"
+        },
+        {
+          "brand": "Givenchy",
+          "category": "scarves",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/accessories/givenchy-silky-scarves-31"
+        },
+        {
+          "brand": "Dolce & Gabbana",
+          "category": "scarves",
+          "gender": "M",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/accessories/dolce-gabbana-floral-print-striped-scarf"
+        },
+        {
+          "brand": "Fendi",
+          "category": "scarves",
+          "gender": "M",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/accessories/fendi-winter-scarves-24"
+        }
+      ]
+    ],
+    "distances": [
+      [
+        0.3280724883079529,
+        0.3336924612522125,
+        0.33468490839004517,
+        0.33610251545906067,
+        0.33635982871055603
+      ]
+    ],
+    "included": [
+      "distances",
+      "documents",
+      "metadatas"
+    ]
+  },
+  "recommendation_set_2": {
+    "ids": [
+      [
+        "-1042737569618723972",
+        "-8373495761156867090",
+        "-8287948148230322882",
+        "7697749551996557703",
+        "-1579322060071200686"
+      ]
+    ],
+    "embeddings": null,
+    "documents": [
+      [
+        "Handbag\n        Handbag tory burch woman colour black.\n        Brand: Tory Burch\n        Category: handbag\n        Style: \n        Materials: \n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "Handbags\n        Elevate your evening look with this dark brown calf leather Vivienne Westwood clutch. Featuring a detachable chain-link shoulder strap, single top handle, signature Orb plaque detail, and kiss-lock fastening. The main compartment includes an internal zip-fastening pocket and logo patch. Complete with silver-tone hardware and full lining. Comes with a protective dust bag. Rated three out of five by Good On You for its impact on the planet, people, and animals.\n        Brand: Vivienne Westwood\n        Category: shoulder bags\n        Style: \n        Materials: calf leather, silver-tone hardware, full lining\n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "Handbag\n        Solid colour, handbag. Soft Leather.\n        Brand: Jimmy Choo\n        Category: handbag\n        Style: \n        Materials: Soft Leather\n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "Handbags\n        Elevate your style with the Golden Goose Venezia Leather Tote Bag. This female handbag is 21 cms wide, perfect for carrying your essentials in chic fashion.\n        Brand: Golden Goose\n        Category: tote\n        Style: \n        Materials: leather\n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "Leather Lotus 12 Handbag\n        Black Leather Lotus 12 Handbag from BOYY\n        Brand: BOYY\n        Category: totes\n        Style: \n        Materials: leather\n        Colors: \n        Season: None\n        Price Tier: luxury"
+      ]
+    ],
+    "uris": null,
+    "data": null,
+    "metadatas": [
+      [
+        {
+          "brand": "Tory Burch",
+          "category": "handbag",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/bags/tory-burch-handbag-1679"
+        },
+        {
+          "brand": "Vivienne Westwood",
+          "category": "shoulder bags",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/bags/vivienne-westwood-clutches-47"
+        },
+        {
+          "brand": "Jimmy Choo",
+          "category": "handbag",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/bags/jimmy-choo-handbag-862"
+        },
+        {
+          "brand": "Golden Goose",
+          "category": "tote",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/bags/golden-goose-deluxe-brand-handbags-115"
+        },
+        {
+          "brand": "BOYY",
+          "category": "totes",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/bags/boyy-leather-lotus-12-handbag-2"
+        }
+      ]
+    ],
+    "distances": [
+      [
+        0.2543222904205322,
+        0.2570435702800751,
+        0.2585563063621521,
+        0.2589627802371979,
+        0.26230669021606445
+      ]
+    ],
+    "included": [
+      "distances",
+      "documents",
+      "metadatas"
+    ]
+  },
+  "recommendation_set_3": {
+    "ids": [
+      [
+        "-3202942535825730530",
+        "-211952875895881294",
+        "6127462591696856106",
+        "1589608941642096196",
+        "-6920905590359643723"
+      ]
+    ],
+    "embeddings": null,
+    "documents": [
+      [
+        "Suit Jacket\n        The studio unveils its new collection, the epitome of Parisian chic. Elegance and sophistication unite in a subtle interplay of contrasts and proportions, giving your looks a confident, modern edge. It's a wardrobe staple: this season, the checked suit jacket is getting a new twist with a jewellery bow brooch with rhinestones on the chest. Featuring a lapel collar, structured shoulders and two flap pockets, it has a button-down fastening and buttoned cuffs for an elegantly structured silhouette.\n        Brand: maje\n        Category: jackets\n        Style: \n        Materials: \n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "Crocodile-Jacquard Wool Blazer\n        Black virgin wool patterned jacquard signature Medusa Head buttons notched lapels front button fastening long sleeves detachable branded patch buttoned cuffs chest welt pocket two front patch pockets American rear vent straight hem satin lining Size: 38. Gender: Female. Material:Virgin Wool/Cupro/Viscose.\n        Brand: Versace\n        Category: jackets\n        Style: \n        Materials: Virgin Wool, Cupro, Viscose\n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "Knitted Sneakers\n        Knitted Sneakers from Lanvin\n        Brand: Lanvin\n        Category: sneakers\n        Style: \n        Materials: \n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "Jacket\n        Jacket versace men color gold.\n        Brand: Versace\n        Category: jackets\n        Style: \n        Materials: nylon\n        Colors: \n        Season: None\n        Price Tier: luxury",
+        "Plaid Shirt-Jacket With Embossed Leather Details\n        The plaid shirt-jacket is oversized and has a snake print leather yolk. The style closes with front snaps and has a softly rounded hem.\n        Brand: Dorothee Schumacher\n        Category: jackets\n        Style: \n        Materials: plaid fabric, leather\n        Colors: \n        Season: None\n        Price Tier: luxury"
+      ]
+    ],
+    "uris": null,
+    "data": null,
+    "metadatas": [
+      [
+        {
+          "brand": "maje",
+          "category": "jackets",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/clothing/maje-suit-jacket-141"
+        },
+        {
+          "brand": "Versace",
+          "category": "jackets",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/clothing/versace-crocodile-jacquard-wool-blazer"
+        },
+        {
+          "brand": "Lanvin",
+          "category": "sneakers",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/shoes/lanvin-knitted-sneakers-1"
+        },
+        {
+          "brand": "Versace",
+          "category": "jackets",
+          "gender": "M",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/clothing/versace-jacket-1767"
+        },
+        {
+          "brand": "Dorothee Schumacher",
+          "category": "jackets",
+          "gender": "F",
+          "price_tier": "luxury",
+          "url": "https://www.lyst.com/clothing/dorothee-schumacher-plaid-shirt-jacket-with-embossed-leather-details"
+        }
+      ]
+    ],
+    "distances": [
+      [
+        0.314543217420578,
+        0.3203696608543396,
+        0.3276456892490387,
+        0.3293345868587494,
+        0.332053542137146
+      ]
+    ],
+    "included": [
+      "distances",
+      "documents",
+      "metadatas"
+    ]
+  }
+}
