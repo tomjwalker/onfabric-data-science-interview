@@ -1,0 +1,49 @@
+Project Structure:
+
+├── README.md
+├── challenge.ipynb
+├── data
+│   ├── chroma_db - Vector database storing processed and embedded fashion catalog items
+│   ├── processed
+│   │   ├── analysis_summary.txt - Generated user profile and recommendations
+│   │   ├── fashion_analysis.json - Extracted fashion entities and topics
+│   │   ├── fashion_catalog_sampled.json
+│   │   ├── search_history_sampled.json
+│   │   └── user_comp_analysis.txt
+│   └── raw
+│       ├── fashion_catalog.json - Raw fashion product catalog
+│       └── search_history.json - User search query history
+├── data_exploration
+│   ├── challenge.ipynb
+│   ├── customer_search_exploration.ipynb
+│   └── search_history.py
+├── data_processing
+│   ├── fashion_catalog_processor.py
+│   └── search_history_processor.py
+├── pyproject.toml
+├── requirements.txt
+├── setup.py
+├── src
+│   ├── __init__.py
+│   ├── config
+│   │   ├── __init__.py
+│   │   ├── model_config.py - Configuration for ML models and vector DB
+│   │   └── prompts.yaml - Template prompts for analysis tasks
+│   ├── data_processing
+│   │   ├── __init__.py
+│   │   ├── catalog_processor.py - Core processing logic for fashion catalog items
+│   │   ├── embeddings.py - Manages vector embeddings for catalog items
+│   │   ├── entity_extractor.py
+│   │   └── schema.py - Data models and validation schemas
+│   ├── examples
+│   │   ├── __init__.py
+│   │   ├── catalog_queries.py - Handles personalised catalog search and recommendations
+│   │   ├── process_catalog.py - Main script for processing and embedding catalog data
+│   │   └── test_embeddings.py
+│   └── features
+│       ├── __init__.py
+│       ├── fashion_analysis.py - Analyzes fashion-related entities and trends
+│       └── user_comp_analysis.py - Comprehensive user behaviour analysis
+└── utils
+    ├── generate_tree.py
+    └── project_structure.txt
