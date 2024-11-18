@@ -3,17 +3,17 @@ Project Structure:
 ├── README.md
 ├── challenge.ipynb
 ├── data
-│   ├── chroma_db
+│   ├── chroma_db - Vector database storing processed and embedded fashion catalog items
 │   ├── processed
-│   │   ├── analysis_summary.txt
-│   │   ├── fashion_analysis.json
+│   │   ├── analysis_summary.txt - Generated user profile and recommendations
+│   │   ├── fashion_analysis.json - Extracted fashion entities and topics
 │   │   ├── fashion_catalog_sampled.json
 │   │   ├── product_recommendations.json
 │   │   ├── search_history_sampled.json
 │   │   └── user_comp_analysis.txt
 │   └── raw
-│       ├── fashion_catalog.json
-│       └── search_history.json
+│       ├── fashion_catalog.json - Raw fashion product catalog
+│       └── search_history.json - User search query history
 ├── data_exploration
 │   └── search_history.py
 ├── pyproject.toml
@@ -23,26 +23,25 @@ Project Structure:
 │   ├── __init__.py
 │   ├── config
 │   │   ├── __init__.py
-│   │   ├── model_config.py
-│   │   └── prompts.yaml
+│   │   ├── model_config.py - Configuration for ML models and vector DB
+│   │   └── prompts.yaml - Template prompts for analysis tasks
 │   ├── data_processing
 │   │   ├── __init__.py
-│   │   ├── catalog_processor.py
-│   │   ├── embeddings.py
+│   │   ├── catalog_processor.py - Core processing logic for fashion catalog items
+│   │   ├── embeddings.py - Manages vector embeddings for catalog items
 │   │   ├── entity_extractor.py
 │   │   ├── fashion_catalog_downsampler.py
-│   │   ├── schema.py
+│   │   ├── schema.py - Data models and validation schemas
 │   │   └── search_history_downsampler.py
 │   ├── examples
 │   │   ├── __init__.py
-│   │   ├── process_catalog.py
+│   │   ├── process_catalog.py - Main script for processing and embedding catalog data
 │   │   ├── product_recommendations.py
 │   │   └── test_embeddings.py
 │   └── features
 │       ├── __init__.py
-│       ├── fashion_analysis.py
-│       └── user_comp_analysis.py
+│       ├── fashion_analysis.py - Analyzes fashion-related entities and trends
+│       └── user_comp_analysis.py - Comprehensive user behaviour analysis
 └── utils
     ├── generate_tree.py
-    ├── project_structure.txt
-    └── tree_output.txt
+    └── project_structure.txt
