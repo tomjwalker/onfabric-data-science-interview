@@ -1,7 +1,7 @@
 """
 Main module for processing fashion catalog data
 """
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import json
 from pathlib import Path
 import chromadb
@@ -11,6 +11,7 @@ from .embeddings import EmbeddingManager
 from ..config.model_config import ModelConfig, VectorDBConfig
 import os
 from chromadb.utils import embedding_functions
+import tiktoken
 
 class CatalogProcessor:
     def __init__(
@@ -35,11 +36,65 @@ class CatalogProcessor:
             embedding_function=self.embedding_function,
             metadata={"hnsw:space": "cosine"}
         )
+        
+        self.model_config = model_config
     
-    def process_catalog(self, catalog_data: List[Dict[str, Any]]) -> List[ProcessedCatalogItem]:
+    def estimate_processing_cost(self, catalog_data: List[Dict[str, Any]]) -> Tuple[int, float]:
+        """
+        Estimate the tokens and cost for processing the catalog data.
+        
+        Returns:
+            Tuple[int, float]: (estimated total tokens, estimated total cost in USD)
+        """
+        # Sample the first item or use a small batch for estimation
+        sample_size = min(5, len(catalog_data))
+        sample_items = catalog_data[:sample_size]
+        
+        # Get the encoding based on the model
+        encoding = tiktoken.encoding_for_model(ModelConfig.DEFAULT_MODEL)
+        
+        # Estimate tokens for a sample item
+        sample_tokens = 0
+        for item in sample_items:
+            # Convert to string to estimate tokens for the main content
+            item_str = f"{item.get('title', '')} {item.get('description', '')} {item.get('brand', '')}"
+            tokens = len(encoding.encode(item_str))
+            sample_tokens += tokens
+        
+        # Calculate average tokens per item
+        avg_tokens_per_item = sample_tokens / sample_size
+        
+        # Estimate total tokens for all items
+        total_items = len(catalog_data)
+        estimated_total_tokens = avg_tokens_per_item * total_items
+        
+        # Add overhead for entity extraction and embedding (approximately 1.5x)
+        estimated_total_tokens *= 1.5
+        
+        # Get cost rates from model config
+        input_cost, output_cost = ModelConfig.get_cost_rates(ModelConfig.DEFAULT_MODEL)
+        
+        # Estimate total cost (assuming roughly equal input/output tokens)
+        total_cost = (estimated_total_tokens * (input_cost + output_cost) / 2000)  # Divide by 2000 as rates are per 1k tokens
+        
+        return int(estimated_total_tokens), total_cost
+
+    def process_catalog(self, catalog_data: List[Dict[str, Any]], verbose: bool = False) -> List[ProcessedCatalogItem]:
         """
         Process entire catalog and store in vector database
         """
+        if verbose:
+            estimated_tokens, estimated_cost = self.estimate_processing_cost(catalog_data)
+            print("Estimated processing requirements:")
+            print(f"Total items: {len(catalog_data)}")
+            print(f"Estimated tokens: {estimated_tokens:,}")
+            print(f"Estimated cost: ${estimated_cost:.2f}")
+            
+            proceed = input("Do you want to proceed? (y/n): ")
+            if proceed.lower() != 'y':
+                print("Aborting...")
+                return []
+        
         processed_items = []
         
         for raw_item in catalog_data:

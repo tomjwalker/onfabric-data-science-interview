@@ -1,5 +1,4 @@
-"""
-Example script demonstrating how to use the catalog processing modules
+"""Example script demonstrating how to use the catalog processing modules
 """
 import json
 from pathlib import Path
@@ -23,18 +22,44 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
-def load_catalog(catalog_path: Path) -> List[Dict]:
+def load_catalog(file_path: str) -> List[Dict]:
     """Load the fashion catalog from JSON file"""
     try:
-        with open(catalog_path, 'r', encoding='utf-8') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            # Convert to CatalogItem and immediately to dict
-            return [CatalogItem.parse_obj(item).dict() for item in data]
+            # Just return the raw dictionary data
+            return data
     except Exception as e:
         logger.error(f"Error loading catalog file: {str(e)}")
         raise
 
-def main(verbose: bool, test_mode: bool):
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description='Process fashion catalog data')
+    parser.add_argument(
+        '--catalog-path',
+        type=str,
+        default=os.getenv('CATALOG_PATH', 'data/processed/fashion_catalog_sampled.json'),
+        help='Path to the fashion catalog JSON file'
+    )
+    parser.add_argument(
+        '--verbose',
+        '-v',
+        action='store_true',
+        help='Enable verbose output'
+    )
+    parser.add_argument(
+        '--test',
+        '-t',
+        action='store_true',
+        help='Run in test mode'
+    )
+    return parser.parse_args()
+
+def main():
+    # Parse arguments
+    args = parse_args()
+    
     # Initialize configurations
     model_config = ModelConfig()
     db_config = VectorDBConfig()
@@ -42,28 +67,30 @@ def main(verbose: bool, test_mode: bool):
     # Initialize the catalog processor
     processor = CatalogProcessor(model_config, db_config)
     
-    # Load catalog data
-    catalog_path = Path("data/raw/fashion_catalog.json")
+    # Load catalog data using the configured path
+    catalog_path = Path(args.catalog_path)
     logger.info(f"Loading catalog from {catalog_path}")
     raw_catalog = load_catalog(catalog_path)
     
-    # Get current count of processed items
-    current_count = processor.collection.count()
-    logger.info(f"Found {current_count} existing items in database")
+    # Get cost estimate before processing
+    estimated_tokens, estimated_cost = processor.estimate_processing_cost(raw_catalog)
+    logger.info("\nEstimated Processing Requirements:")
+    logger.info(f"Total items: {len(raw_catalog)}")
+    logger.info(f"Estimated tokens: {estimated_tokens:,}")
+    logger.info(f"Estimated cost: ${estimated_cost:.2f}")
     
-    # Skip already processed items
-    if current_count > 0:
-        raw_catalog = raw_catalog[current_count:]
-        logger.info(f"Skipping {current_count} already processed items")
+    proceed = input("\nDo you want to proceed? (y/n): ")
+    if proceed.lower() != 'y':
+        logger.info("Aborting...")
+        return
     
     # Process in batches with rate limiting and better error handling
-    BATCH_SIZE = 5  # Even smaller batch size
-    RATE_LIMIT_PAUSE = 5  # Longer pause between batches
+    BATCH_SIZE = 5
+    RATE_LIMIT_PAUSE = 5
     MAX_RETRIES = 3
     total_items = len(raw_catalog)
     
     logger.info(f"Processing {total_items} catalog items...")
-    
     for i in range(0, total_items, BATCH_SIZE):
         batch = raw_catalog[i:i + BATCH_SIZE]
         logger.info(f"Processing batch {i//BATCH_SIZE + 1}/{(total_items + BATCH_SIZE - 1)//BATCH_SIZE}")
@@ -71,7 +98,7 @@ def main(verbose: bool, test_mode: bool):
         retries = 0
         while retries < MAX_RETRIES:
             try:
-                processed_items = processor.process_catalog(batch)
+                processed_items = processor.process_catalog(batch, verbose=False)
                 logger.info(f"Successfully processed {len(processed_items)} items in current batch")
                 time.sleep(RATE_LIMIT_PAUSE)
                 break
@@ -152,11 +179,5 @@ def main(verbose: bool, test_mode: bool):
                     logger.info(f"Description: {first_item.get('description', 'N/A')}")
             logger.info("---")
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Process fashion catalog data')
-    parser.add_argument('--test', action='store_true', help='Run in test mode (process only 2 chunks)')
-    parser.add_argument('--verbose', action='store_true', help='Print detailed progress')
-    args = parser.parse_args()
-    
-    print(f"Running with test_mode={args.test}, verbose={args.verbose}")
-    main(verbose=args.verbose, test_mode=args.test) 
+if __name__ == "__main__":
+    main() 
